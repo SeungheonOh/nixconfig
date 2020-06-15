@@ -1,4 +1,4 @@
-{  pkgs, ...}:
+{  pkgs, ... }:
 {
   imports = [
     ./pkgs/wind/wind.nix
@@ -9,6 +9,7 @@
       allowUnfree = true;
       packageOverrides = {
         wind = pkgs.callPackage pkgs/wind/default.nix {};
+        pot = pkgs.callPackage pkgs/pot/default.nix {};
       };
     };
   };

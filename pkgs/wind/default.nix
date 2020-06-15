@@ -1,12 +1,12 @@
 { stdenv, xorg, fetchFromGitHub }:
 stdenv.mkDerivation rec {
   name = "Wind";
-  version = "1.1";
+  version = "1.2";
 
   src = fetchFromGitHub {
     owner  = "SeungheonOh";
     repo   = "Wind";
-    rev    = "1.1";
+    rev    = "1.2";
     sha256 = "0501hlfis5yr1fcv41w4hwp1d1xlaqrsag8lq6ww6rn3fz18vrr7";
   };
 

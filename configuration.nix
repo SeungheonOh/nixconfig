@@ -31,6 +31,10 @@
       wlo1.useDHCP = true;
       enp24s0.useDHCP = false;
     };
+    firewall = {
+      enable = true;
+      allowedTCPPorts = [ 8080 ];
+    };
   };
 
   # Set your time zone.
@@ -40,6 +44,9 @@
   environment.systemPackages = with pkgs; [
     # Standard Editor
     ed
+
+    # man
+    manpages
 
     # Basics
     bash
@@ -55,12 +62,16 @@
     cmake 
     ag
     clang
+    jq
 
     # editor
     vim
 
     # util
+    ntfs3g
     imagemagick
+    ffmpeg
+    pot
 
     # email
     aerc
@@ -72,7 +83,12 @@
     wmutils-core
     xorg.xkill
     rxvt_unicode
+    urxvt_font_size
     libnotify
+    wine
+    wind
+    xdotool
+    feh
 
     # Fun
     steam
@@ -85,6 +101,8 @@
     fontconfig.enable = true;
     fonts = with pkgs; [
       # English/Universial
+      ibm-plex
+      unifont
       corefonts
       iosevka
       google-fonts
@@ -99,8 +117,10 @@
   };
 
   sound.enable = true;
-  hardware.pulseaudio.enable = true;
-  hardware.opengl.driSupport32Bit = true;
+  hardware = {
+    pulseaudio.enable = true;
+    opengl.driSupport32Bit = true;
+  };
 
   services = {
     xserver = {
@@ -109,7 +129,6 @@
       xkbOptions = "eurosign:e";
       videoDrivers = [ "nvidia" ];
       displayManager.startx.enable = true;
-      windowManager.wind.enable = true;
     };
   };
 

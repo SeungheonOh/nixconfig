@@ -5,6 +5,21 @@ let
     rev = "a7cdfaa32585fce404cf8890bae099348e53e0ad";
     ref = "master";
   };
+
+  shellInit = ''
+    # Envs
+    export XRDM_DIR=$HOME/.Xresource.d
+    export XRDM_FONT_DIR=$XRDM_DIR/fonts
+    export XRDM_COLOR_DIR=$XRDM_DIR/colors
+    export XRDM_PRESET_DIR=$XRDM_DIR/presets
+    export XRDM_PROGRAM_DIR=$XRDM_DIR/programs
+
+    export PATH=$PATH:$HOME/bin
+    export EDITOR="vim"
+    export GOPATH=~/go
+  '';
+
+  generalFont = "IBM Plex Sans 12";
 in
 {
   imports = [ "${home-manager}/nixos" ];
@@ -19,19 +34,24 @@ in
   nixpkgs = {
     config = {
       allowUnfree = true;
-      firefox.enableBrowserpass = true; 
-      firefox.enableAdobeFlash = true;
-      firefox.enableGnomeExtensions = true;
     };
   };
 
   home-manager.users.seungheonoh = {
+    # Custom homemanager modules
+    imports = [
+      ./modules/ksh.nix
+    ];
     home.packages = with pkgs; [
       # Text editor
       ed # The standard text editor
 
+      ksh
+
       # GUI
       firefox
+
+      vitetris # Best Arcade
     ];
 
     home.sessionVariables = {
@@ -47,11 +67,13 @@ in
         enable = true;
         vimAlias = true;
         extraConfig = ''
-          color default
-          set t_Co=256;
+          set t_Co=0;
           set t_ut=
           let g:seoul256_background = 233
-          syntax on
+          "syntax on
+          highlight Comment cterm=italic
+          highlight String cterm=italic
+          highlight Constant cterm=bold,italic
           set tabstop=2 shiftwidth=2 expandtab
           set softtabstop=2
           set smarttab
@@ -69,20 +91,20 @@ in
           nnoremap <leader>// :let @/ = ""<cr>
           nnoremap <leader>ff :FZF <cr>
           nnoremap <leader>ag :Ag<cr>
+          nnoremap <F1> gg"+yG
         '';
-        plugins = with pkgs.vimPlugins; [ 
+        plugins = with pkgs.vimPlugins; [
           # Syntax
           vim-go
           vim-nix
 
           # Util
           nerdtree
-          nerdcommenter 
-          tagbar 
+          nerdcommenter
+          tagbar
           fzf-vim
           fzfWrapper
           goyo
-          ale
 
           # Colorscheme
           seoul256-vim
@@ -97,31 +119,31 @@ in
         enable = true;
       };
 
+      ksh = {
+        enable = true;
+        initExtra = shellInit;
+      };
+
       bash = {
         enable = true;
         shellAliases = {
           v = "nvim";
           c = "cd";
+          ns = "nix-shell";
+          nsp = "nix-shell -p";
+          nor = "sudo nixos-rebuild switch";
         };
-        initExtra = ''
-          # Envs
-          export XRDM_DIR=$HOME/.Xresource.d
-          export XRDM_FONT_DIR=$XRDM_DIR/fonts
-          export XRDM_COLOR_DIR=$XRDM_DIR/colors
-          export XRDM_PRESET_DIR=$XRDM_DIR/presets
-          export XRDM_PROGRAM_DIR=$XRDM_DIR/programs
-      
-          export PATH=$PATH:$HOME/bin
-          export EDITOR="vim"
-          export GOPATH=~/go
-        '';
+        initExtra = shellInit;
         bashrcExtra = ''
           # Prompt
           declare -a prompts=("λ" "$" "±" "Δ")
           get_prompt_char() {
             echo ''${prompts[((''$RANDOM % ''${#prompts[@]}))]}
           }
-          export PS1='\[\e[1;32m\]$(get_prompt_char)\[\e[0m\] ( \W ) '
+          #export PS1='\[\e[1;32m\]$(get_prompt_char)\[\e[0m\] ( \W ) '
+          export PS1='[ \W ]$ '
+          bind 'TAB:menu-complete'
+          bind 'set show-all-if-ambiguous on'
           source xrdm
         '';
       };
@@ -165,11 +187,11 @@ in
           bind-key enter next-layout
         '';
       };
-      
+
       rofi = {
         enable = true;
         extraConfig = ''
-          * {background-color: #000000;text-color: #FFFFFF;spacing: 0;width: 30%;}
+          * {font: ${generalFont};background-color: #000000;text-color: #FFFFFF;spacing: 0;width: 30%;}
           inputbar {children: [prompt,entry];}
           prompt {padding: 16px;}
           textbox {background-color: #2e343f;padding: 8px 16px;}
@@ -197,7 +219,7 @@ in
             frame_width = 2;
             sort = "no";
             idle_threshold = 120;
-            font = "Iosevka 12";
+            font = "${generalFont}";
             line_height = 4;
             markup = "full";
             format = "%s\n%b";
@@ -253,6 +275,15 @@ in
           "super + d" = "rofi -show run";
           "super + f" =  "fullscreen full $(pfw)";
           "super + s" = "session_menu";
+
+          "alt + Return" = ''sh -c "urxvt & exit"'';
+          "alt + q" =  "xkill -id $(pfw)";
+          "alt + d" = "rofi -show run";
+          "alt + f" =  "fullscreen full $(pfw)";
+          "alt + s" = "session_menu";
+          
+          "Print" = "screenshot Area";
+          "ctrl + Print" = "screenshot Window";
         };
       };
     };
