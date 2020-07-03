@@ -28,7 +28,7 @@ in
     name = "seungheonoh";
     isNormalUser = true;
     home = "/home/seungheonoh";
-    extraGroups = [ "wheel" "audio" "networkmanager" "video" "tty"];
+    extraGroups = [ "wheel" "audio" "networkmanager" "video" "tty" "influxdb" ];
   };
 
   nixpkgs = {
@@ -67,10 +67,7 @@ in
         enable = true;
         vimAlias = true;
         extraConfig = ''
-          set t_Co=0;
-          set t_ut=
-          let g:seoul256_background = 233
-          "syntax on
+          syntax off
           highlight Comment cterm=italic
           highlight String cterm=italic
           highlight Constant cterm=bold,italic
@@ -92,6 +89,9 @@ in
           nnoremap <leader>ff :FZF <cr>
           nnoremap <leader>ag :Ag<cr>
           nnoremap <F1> gg"+yG
+
+          xmap ga <Plug>(EasyAlign)
+          nmap ga <Plug>(EasyAlign)
         '';
         plugins = with pkgs.vimPlugins; [
           # Syntax
@@ -103,6 +103,7 @@ in
           nerdcommenter
           tagbar
           fzf-vim
+          vim-easy-align
           fzfWrapper
           goyo
 
@@ -136,12 +137,15 @@ in
         initExtra = shellInit;
         bashrcExtra = ''
           # Prompt
-          declare -a prompts=("λ" "$" "±" "Δ")
-          get_prompt_char() {
-            echo ''${prompts[((''$RANDOM % ''${#prompts[@]}))]}
+          restore_prompt_after_nix_shell() {
+            if [ "$PS1" != "$PROMPT" ]; then
+              PS1="*$PROMPT"
+              PROMPT_COMMAND=""
+            fi
           }
-          #export PS1='\[\e[1;32m\]$(get_prompt_char)\[\e[0m\] ( \W ) '
-          export PS1='[ \W ]$ '
+          PROMPT_COMMAND=restore_prompt_after_nix_shell
+          PROMPT='[ \W ]$ '
+          export PS1=$PROMPT
           bind 'TAB:menu-complete'
           bind 'set show-all-if-ambiguous on'
           source xrdm

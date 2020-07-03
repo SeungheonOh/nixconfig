@@ -25,7 +25,7 @@
   };
 
   networking = {
-    hostName = "NixOS";
+    hostName = "cL7AySgCX3";
     networkmanager.enable = true;
     interfaces = {
       wlo1.useDHCP = true;
@@ -90,8 +90,15 @@
     xdotool
     feh
 
+    #db
+    influxdb
+
+    #etc
+    telegraf
+
     # Fun
     steam
+    rpcs3
     minecraft
     minecraft-server
   ];
@@ -128,9 +135,47 @@
       layout = "us";
       xkbOptions = "eurosign:e";
       videoDrivers = [ "nvidia" ];
-      displayManager.startx.enable = true;
+      #displayManager.startx.enable = true;
+      desktopManager.gnome3.enable = true;
+      displayManager.gdm.enable = true;
+    };
+    grafana = {
+      enable = true;
+      port = 3000;
+      domain = "localhost";
+      protocol = "http";
+      dataDir = "/var/lib/grafana";
+    };
+    influxdb = {
+      enable = true;
+      dataDir = "/var/db/influxdb";
+    };
+    telegraf = {
+      enable = true;
+      extraConfig = {
+        inputs = {
+          net = { interfaces = [ "wlo1" ]; };
+          netstat = {};
+          cpu = { totalcpu = true; };
+          sensors = {};
+          kernel = {};
+          mem = {};
+          swap = {};
+          processes = {};
+          system = {};
+          disk = {};
+          diskio = {};
+        };
+        outputs = {
+          influxdb = {
+            database = "system_log";
+            urls = [ "http://localhost:8086" ];
+          };
+        };
+      };
     };
   };
+  systemd.services.telegraf.path = [ pkgs.lm_sensors ];
 
   nix.gc = {
     automatic = true;
